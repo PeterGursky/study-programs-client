@@ -1,0 +1,91 @@
+<table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+  <ng-container matColumnDef="id" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Skratka</th>
+    <td mat-cell *matCellDef="let subject">
+      <mat-chip-list>
+        <mat-chip [routerLink]="[subjectUrl(subject.id)]" color="primary" selected>
+          {{subject.id}}
+        </mat-chip>
+      </mat-chip-list>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="name" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Názov</th>
+    <td mat-cell *matCellDef="let subject"> {{subject.name}} </td>
+  </ng-container>
+  <ng-container matColumnDef="credits" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Kredit</th>
+    <td mat-cell *matCellDef="let subject" > {{subject.ais.credits}} </td>
+  </ng-container>
+  <ng-container matColumnDef="length" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Rozsah</th>
+    <td mat-cell *matCellDef="let subject"> {{subject.ais.length}} </td>
+  </ng-container>
+  <ng-container matColumnDef="evaluation" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Ukonč.</th>
+    <td mat-cell *matCellDef="let subject"> {{subject.ais.evaluation}} </td>
+  </ng-container>
+  <ng-container matColumnDef="programLevels"  >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Stupeň</th>
+    <td mat-cell *matCellDef="let subject"> {{computed[subject.id].programLevels}} </td>
+  </ng-container>
+  <ng-container matColumnDef="semester" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Sem.</th>
+    <td mat-cell *matCellDef="let subject"> {{subject.ais.semester}} </td>
+  </ng-container>
+  <ng-container matColumnDef="text_SO" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header [matTooltip]="subjectTextTypeSK['SO']">SO</th>
+    <td mat-cell *matCellDef="let subject" [class]="computed[subject.id].texts['SO'].color" [matTooltip]="subjectTextTypeSK['SO']"> {{computed[subject.id].texts['SO'].length}} </td>
+  </ng-container>
+  <ng-container matColumnDef="text_VV" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header [matTooltip]="subjectTextTypeSK['VV']">VV</th>
+    <td mat-cell *matCellDef="let subject" [class]="computed[subject.id].texts['VV'].color" [matTooltip]="subjectTextTypeSK['VV']"> {{computed[subject.id].texts['VV'].length}} </td>
+  </ng-container>
+  <ng-container matColumnDef="text_L" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header [matTooltip]="subjectTextTypeSK['L']">L</th>
+    <td mat-cell *matCellDef="let subject" [class]="computed[subject.id].texts['L'].color" [matTooltip]="subjectTextTypeSK['L']"> {{computed[subject.id].texts['L'].length}} </td>
+  </ng-container>
+  <ng-container matColumnDef="text_PJ" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header [matTooltip]="subjectTextTypeSK['PJ']">PJ</th>
+    <td mat-cell *matCellDef="let subject" [class]="computed[subject.id].texts['PJ'].color" [matTooltip]="subjectTextTypeSK['PJ']"> {{computed[subject.id].texts['PJ'].length}} </td>
+  </ng-container>
+  <ng-container matColumnDef="text_PA" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header [matTooltip]="subjectTextTypeSK['PA']">PA</th>
+    <td mat-cell *matCellDef="let subject" [class]="computed[subject.id].texts['PA'].color" [matTooltip]="subjectTextTypeSK['PA']"> {{computed[subject.id].texts['PA'].length}} </td>
+  </ng-container>
+  <ng-container matColumnDef="text_PZ" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header [matTooltip]="subjectTextTypeSK['PZ']">PZ</th>
+    <td mat-cell *matCellDef="let subject" [class]="computed[subject.id].texts['PZ'].color" [matTooltip]="subjectTextTypeSK['PZ']"> {{computed[subject.id].texts['PZ'].length}} </td>
+  </ng-container>
+  <ng-container matColumnDef="inStudyPrograms" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Št.prog.</th>
+    <td mat-cell *matCellDef="let subject" class="studyProgramsCol"> 
+      <mat-chip-list aria-label="inStudyPrograms">
+      <mat-chip *ngFor="let program of computed[subject.id].inPrograms"
+         [routerLink]="['/study-program',program.studyProgram]"  
+         matTooltip="blok: {{program.blockName}}, ročník: {{program.yearsOfStudy}}" [color]="subjectColor[program.blockType]" selected>
+        {{program.studyProgram}} 
+      </mat-chip>
+      </mat-chip-list>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="prerequisitesString" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Podmieňujúce</th>
+    <td mat-cell *matCellDef="let subject"> {{subject.ais.prerequisitesString}} </td>
+  </ng-container>
+  <ng-container matColumnDef="teachers" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Vyučujúci</th>
+    <td mat-cell *matCellDef="let subject" class="teachersCol"> 
+      <mat-chip-list aria-label="Teachers">
+      <mat-chip *ngFor="let teacher of subject.ais.teachers"
+         [routerLink]="['/teacher',teacher.id]"  
+         [matTooltip]="teacher | teacherToString">
+        {{teacher.lastName}} 
+      </mat-chip>
+      </mat-chip-list>
+    </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+</table>
+

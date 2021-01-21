@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>Zobrazené stĺpce</h1>
+<div mat-dialog-content>
+  <div *ngFor="let setting of settings" >
+    <input type="checkbox" [(ngModel)]="setting.checked">
+    <label>{{setting.title}}</label>
+  </div>
+  <hr>
+  <div>
+    <input type="checkbox" [(ngModel)]="showBlocks">  
+    <label>zobraziť predmety v blokoch</label>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="cancelClick()" cdkFocusInitial>Zrušiť</button>
+  <button mat-button (click)="defaultClick()">Default</button>
+  <button mat-button (click)="saveClick()">Uložiť</button>
+</div>

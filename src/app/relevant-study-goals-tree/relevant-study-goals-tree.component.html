@@ -1,0 +1,44 @@
+<mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+  <!-- This is the tree node template for leaf nodes -->
+  <mat-tree-node *matTreeNodeDef="let subject" matTreeNodeToggle>
+    <li class="mat-tree-node">
+      <!-- use a disabled button to provide padding for tree leaf -->
+      <button mat-icon-button disabled></button>
+      <ng-container *ngTemplateOutlet="studyGoalLabel; context: {$implicit: subject}"></ng-container>
+    </li>
+  </mat-tree-node>
+  <!-- This is the tree node template for expandable nodes -->
+  <mat-nested-tree-node *matTreeNodeDef="let subject; when: hasChild">
+    <li>
+      <div class="mat-tree-node">
+        <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + subject.name">
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{treeControl.isExpanded(subject) ? 'expand_more' : 'chevron_right'}}
+          </mat-icon>
+        </button>
+        <ng-container *ngTemplateOutlet="studyGoalLabel; context: {$implicit: subject}"></ng-container>
+      </div>
+      <ul [class.example-tree-invisible]="!treeControl.isExpanded(subject)">
+        <ng-container matTreeNodeOutlet></ng-container>
+      </ul>
+    </li>
+  </mat-nested-tree-node>
+</mat-tree>
+
+<ng-template #studyGoalLabel let-subject>
+  <mat-chip-list>
+    <mat-chip *ngIf="subject.goal && subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="primary" selected>
+      {{subject.id}}
+    </mat-chip>
+    <mat-chip *ngIf="subject.goal && !subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="accent" selected>
+      {{subject.id}}
+    </mat-chip>
+    <mat-chip *ngIf="!subject.goal" color="warn" selected matTooltip="Zrušený predmet - {{subject.name}}">
+      {{subject.id}}
+    </mat-chip>
+  </mat-chip-list>
+  {{subject.name}}
+  <button *ngIf="removable(subject)" mat-mini-fab color="warn" (click)="$event.stopPropagation(); removeStudyGoal(subject)" class="indent">
+    <mat-icon>close</mat-icon>
+  </button>
+</ng-template>

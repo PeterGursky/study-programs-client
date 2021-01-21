@@ -1,0 +1,96 @@
+<ng-container *ngIf="teacher">
+  <h1>{{teacher.fullName}}</h1>
+  <section id="header_info">
+    <div class="edit-container" *ngIf="userName$ | async">
+      <button mat-mini-fab color="accent" (click)="editing = true" *ngIf="!editing">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-mini-fab color="accent" (click)="editing = false" *ngIf="editing">
+        <mat-icon>visibility</mat-icon>
+      </button>
+    </div>
+    <div class="settings-container">
+      <button mat-mini-fab color="primary" (click)="settingsClick()">
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
+    <div>
+      <img src="https://ais2.upjs.sk/fotky/{{teacher.id}}.jpg" onError="this.hidden=true">
+    </div>
+    <div *ngIf="teacher.personalWebUrl && !editing">
+      <strong>Osobná webová stránka: </strong> <a [href]="teacher.personalWebUrl" target="_blank">{{teacher.personalWebUrl}}</a>
+    </div>
+
+    <div *ngIf="editing">
+      <strong>Osobná webová stránka: </strong>   
+      <mat-form-field appearance="standard">
+        <mat-label>URL osobnej webstránky</mat-label>
+        <input matInput placeholder="https://" [(ngModel)]="url" name="url">
+        <mat-hint>v tvare https://... alebo http://...</mat-hint>
+      </mat-form-field>
+      <button mat-icon-button color="primary" aria-label="send URL" (click)="sendUrl()" matTooltip="Uložiť URL">
+        <mat-icon>send</mat-icon>
+      </button>
+      <button mat-icon-button color="warn" aria-label="delete URL" (click)="deleteUrl()" matTooltip="Odstrániť URL">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+
+    <div *ngIf="teacher.research && !editing">
+      <h2>Vedecké zameranie:</h2> 
+      <p [innerHTML]="researchHTML"></p>
+    </div>
+
+    <form *ngIf="editing">
+      <mat-form-field appearance="fill" class="textarea-form-field">
+        <mat-label>Vedecké zameranie:</mat-label>
+        <textarea matInput [(ngModel)]="researchTXT" name="researchTextArea" id="researchTextArea"></textarea>
+       
+      </mat-form-field>
+      <button mat-icon-button color="primary" (click)="saveResearch()" matTooltip="Uložiť vedecké zameranie">
+        <mat-icon>send</mat-icon>
+      </button> 
+      <button mat-icon-button color="warn" aria-label="delete research" (click)="deleteResearch()" matTooltip="Odstrániť vedecké zameranie">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </form>
+  </section>
+
+  <section id="studyGoals" *ngIf="studyGoals?.length">
+    <h2>Participuje na predmetoch</h2>
+    <div *ngIf="showByRoles; then thenBlock else elseBlock"></div>
+    <ng-template #thenBlock>
+      <div *ngFor="let role of roles">
+        <strong>{{role.role}}: </strong>
+        <app-subjects-table [subjects]="role.studyGoals"></app-subjects-table>
+      </div>
+    </ng-template>
+    <ng-template #elseBlock>
+      <app-subjects-table [subjects]="studyGoals"></app-subjects-table>
+    </ng-template>
+  </section>
+  <section id="roles" *ngIf="roles.length && ! (studyGoals?.length)">
+    <h2>Participuje na predmetoch</h2>
+    <div *ngFor="let role of roles">
+      <strong>{{role.role}}: </strong>
+      <table mat-table [dataSource]="role.subjects">
+        <ng-container matColumnDef="id" >
+          <th mat-header-cell *matHeaderCellDef>Skratka</th>
+          <td mat-cell *matCellDef="let subject">
+            <mat-chip-list>
+              <mat-chip [routerLink]="[subjectUrl(subject.id)]" color="primary" selected>
+                {{subject.id}}
+              </mat-chip>
+            </mat-chip-list>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="name" >
+          <th mat-header-cell *matHeaderCellDef>Názov</th>
+          <td mat-cell *matCellDef="let subject"> {{subject.name}} </td>
+        </ng-container>
+        <tr mat-row *matRowDef="let row; columns: ['id', 'name'];"></tr>    
+      </table>
+    </div>
+  </section>
+
+</ng-container>

@@ -1,0 +1,24 @@
+<ng-container *ngIf="programs">
+    <div *ngFor="let level of levelNames; let i = index">
+      <h2>{{level}}:</h2>
+      <table mat-table [dataSource]="programLevels[i]">
+        <ng-container matColumnDef="id" >
+          <th mat-header-cell *matHeaderCellDef>Skratka</th>
+          <td mat-cell *matCellDef="let program">
+            <mat-chip-list>
+              <mat-chip routerLink="/study-program/{{program.id}}" color="primary" selected>
+                {{program.id}}
+              </mat-chip>
+            </mat-chip-list>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="name" >
+          <th mat-header-cell *matHeaderCellDef>Program</th>
+          <td mat-cell *matCellDef="let program"> {{program.plan.name}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['id', 'name']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['id', 'name'];"></tr>    
+      </table>
+    </div>
+</ng-container>

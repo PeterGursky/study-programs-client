@@ -1,0 +1,233 @@
+<ng-container *ngIf="studyGoal">
+  <h1 *ngIf="studyGoal.ais">{{studyGoal.id}} - {{studyGoal.name}}</h1>
+  <h1 *ngIf="! studyGoal.ais">Zameranie: {{studyGoal.name}}</h1>
+  <section id="main_info">
+    <div class="edit-container" *ngIf="userName$ | async">
+      <button mat-mini-fab color="accent" (click)="editing = true" *ngIf="!editing">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-mini-fab color="accent" (click)="editing = false" *ngIf="editing">
+        <mat-icon>visibility</mat-icon>
+      </button>
+    </div>
+    <span *ngIf="studyGoal.ais?.credits">Kredity: <strong>{{studyGoal.ais.credits}}</strong>, </span>
+    <span *ngIf="studyGoal.ais?.evaluation">
+      Ukončenie: <strong [matTooltip]="subjectEvaluationTypeSK[studyGoal.ais.evaluation]">{{studyGoal.ais.evaluation}}</strong>,
+    </span>
+    <span *ngIf="studyGoal.ais?.length">Rozsah: <strong>{{studyGoal.ais.length}}</strong>, </span>
+    <span *ngIf="studyGoal.ais?.semester">Semester: <strong>{{studyGoal.ais.semester}}</strong> </span>
+  </section>
+
+  <div *ngIf="studyGoal.description && !editing">
+    <p [innerHTML]="descriptionHTML"></p>
+  </div>
+
+  <form *ngIf="editing">
+    <mat-form-field appearance="fill" class="textarea-form-field">
+      <mat-label>Popis študijného cieľa:</mat-label>
+      <textarea matInput [(ngModel)]="descriptionTXT" name="descriptionTextArea" id="descriptionTextArea"></textarea>
+     
+    </mat-form-field>
+    <button mat-icon-button color="primary" (click)="saveDescription()" matTooltip="Uložiť popis">
+      <mat-icon>send</mat-icon>
+    </button> 
+    <button mat-icon-button color="warn" aria-label="delete description" (click)="deleteDescription()" matTooltip="Odstrániť popis">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </form>
+
+  <p *ngIf="studyGoal.url && !editing">
+    <strong>Web predmetu: </strong> <a [href]="studyGoal.url" target="_blank">{{studyGoal.url}}</a>
+  </p>
+
+  <p *ngIf="editing">
+    <strong>Web predmetu: </strong>   
+    <mat-form-field appearance="standard">
+      <mat-label>URL webu predmetu</mat-label>
+      <input matInput placeholder="https://" [(ngModel)]="url" name="url">
+      <mat-hint>v tvare https://... alebo http://...</mat-hint>
+    </mat-form-field>
+    <button mat-icon-button color="primary" aria-label="send URL" (click)="sendUrl()" matTooltip="Uložiť URL">
+      <mat-icon>send</mat-icon>
+    </button>
+    <button mat-icon-button color="warn" aria-label="delete URL" (click)="deleteUrl()" matTooltip="Odstrániť URL">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </p>
+  
+  <p *ngIf="studyGoal.ais?.prerequisitesString">
+    <strong>Prerekvizity v AIS: </strong> {{studyGoal.ais.prerequisitesString}}
+  </p>
+  
+  <mat-accordion>
+    <mat-expansion-panel class="big-panel" (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+      <mat-expansion-panel-header>
+        <section id="relevant-study-goals-chips" *ngIf="!panelOpenState">
+          <section id="prerequisities" *ngIf="(editing || sgPrerequisities.length) && !expandPrerequisities">
+            <p>
+              <button mat-icon-button (click)="$event.stopPropagation(); expandPrerequisities = true" *ngIf="sgPrerequisities.length">
+                <mat-icon>
+                  chevron_right
+                </mat-icon>
+              </button>
+              <strong>Všetky prerekvizity: </strong>
+              <mat-chip-list *ngFor="let subject of sgPrerequisities" class="inline-chips">
+                <mat-chip *ngIf="subject.goal && subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="primary" selected [matTooltip]="subject.name">
+                  {{subject.id}}
+                </mat-chip>
+                <mat-chip *ngIf="subject.goal && !subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="accent" selected matTooltip="Neoficiálna prerekvizita - {{subject.name}}">
+                  {{subject.id}}
+                </mat-chip>
+                <mat-chip *ngIf="!subject.goal" color="warn" selected matTooltip="Zrušený predmet - {{subject.name}}">
+                  {{subject.id}}
+                </mat-chip>
+              </mat-chip-list>
+            </p>
+          </section>
+          <section id="prerequisitiesTree" *ngIf="sgPrerequisities.length && expandPrerequisities">
+            <p>
+              <button mat-icon-button (click)="$event.stopPropagation(); expandPrerequisities = false">
+                <mat-icon>
+                  expand_more
+                </mat-icon>
+              </button>
+              <strong>Všetky prerekvizity: </strong>
+              <app-relevant-study-goals-tree [mainStudyGoal]="studyGoal" [prerequisities]="sgPrerequisitiesTree" [editing]="editing" (goalChanged)="changeRequirements($event)"></app-relevant-study-goals-tree>
+            </p>
+          </section>
+
+          <section id="following" *ngIf="sgFollowing.length && !expandFollowing">
+            <p>
+              <button mat-icon-button (click)="$event.stopPropagation(); expandFollowing = true">
+                <mat-icon>
+                  chevron_right
+                </mat-icon>
+              </button>
+              <strong>Nadväzujúce predmety: </strong>
+              <mat-chip-list *ngFor="let subject of sgFollowing" class="inline-chips">
+                <mat-chip *ngIf="subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="primary" selected [matTooltip]="subject.name">
+                  {{subject.id}}
+                </mat-chip>
+                <mat-chip *ngIf="!subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="accent" selected matTooltip="Neoficiálna nadväznosť - {{subject.name}}">
+                  {{subject.id}}
+                </mat-chip>
+              </mat-chip-list>
+            </p>
+          </section>
+          <section id="followingTree" *ngIf="sgFollowing.length && expandFollowing">
+            <p>
+              <button mat-icon-button (click)="$event.stopPropagation(); expandFollowing = false">
+                <mat-icon>
+                  expand_more
+                </mat-icon>
+              </button>
+              <strong>Nadväzujúce predmety: </strong>
+              <app-relevant-study-goals-tree [mainStudyGoal]="studyGoal" [following]="sgFollowingTree"></app-relevant-study-goals-tree>
+            </p>
+          </section>
+          <section id="fields_of_expertise" *ngIf="sgFieldsOfExpretise.length">
+            <p>
+            <strong>Užitočný pre zamerania: </strong>
+            <mat-chip-list class="inline-chips">
+              <mat-chip *ngFor="let subject of sgFieldsOfExpretise" [routerLink]="[subjectUrl(subject.id)]" color="accent" selected [matTooltip]="subject.name">
+                {{subject.name}}
+              </mat-chip>
+            </mat-chip-list>
+            </p>
+          </section>
+        </section>
+      </mat-expansion-panel-header>
+      <section id="relevant-study-goals-tables">
+        <div id="prerequisities-table" *ngIf="!!sgPrerequisities.length || editing">
+          <strong>Všetky prerekvizity: </strong>
+          <app-relevant-study-goals-table [mainStudyGoal]="studyGoal" [prerequisities]="sgPrerequisities" [editing]="editing" (goalChanged)="changeRequirements($event)"></app-relevant-study-goals-table>
+        </div>
+        <div id="following-table" *ngIf="sgFollowing.length">
+          <strong>Nadväzujúce predmety: </strong>
+          <app-relevant-study-goals-table [mainStudyGoal]="studyGoal" [following]="sgFollowing"></app-relevant-study-goals-table>
+        </div>
+        <div id="fields_of_expertise-table" *ngIf="sgFieldsOfExpretise.length">
+          <strong>Užitočný pre zamerania: </strong>
+          <app-relevant-study-goals-table [mainStudyGoal]="studyGoal" [fieldsOfExpertise]="sgFieldsOfExpretise"></app-relevant-study-goals-table>
+        </div>
+      </section>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <section id="state_exams" *ngIf="sgStateExams.length">
+    <p>
+    <strong>Nadväzujúce štátnice: </strong>
+    <mat-chip-list class="inline-chips">
+      <mat-chip *ngFor="let subject of sgStateExams" [routerLink]="[subjectUrl(subject.id)]" color="primary" selected [matTooltip]="subject.name">
+        {{subject.goal.ais.studyProgramsNames.join(', ')}} - {{subject.id}}
+      </mat-chip>
+    </mat-chip-list>
+    </p>
+  </section>
+
+  <section id="teachers" *ngIf="activeTeacherRoles.length">
+    <h2>Učitelia</h2>
+    <p *ngFor="let teachersRoles of activeTeacherRoles">
+      <strong>{{teachersRoles.role}}: </strong>
+      <mat-chip-list aria-label="Teachers" class="inline-chips">
+        <span *ngFor="let teacher of teachersRoles.teachers">
+          <mat-chip 
+            [routerLink]="['/teacher',teacher.id]">
+            {{teacher.fullName}} 
+          </mat-chip>
+        </span> 
+      </mat-chip-list>  
+    </p>
+  </section>
+
+  <section id="studyPrograms" *ngIf="studyGoal.ais">
+    <h2>V študijných programoch</h2>
+    <p *ngIf="studyPrograms['COMPULSORY']"><strong>Povinný predmet: </strong>
+      <mat-chip-list aria-label="Programs" class="inline-chips">
+        <mat-chip *ngFor="let program of studyPrograms['COMPULSORY']"
+             [routerLink]="['/study-program',program.studyProgram]"  
+           matTooltip="blok: {{program.blockName}}, ročník: {{program.yearsOfStudy}}" color="primary" selected>
+          {{program.studyProgram}} 
+        </mat-chip>
+        </mat-chip-list>  
+    </p>
+    <p *ngIf="studyPrograms['COMPULSORY_ELECTIVE']"><strong>Povinne voliteľný predmet: </strong>
+      <mat-chip-list aria-label="Programs" class="inline-chips">
+        <mat-chip *ngFor="let program of studyPrograms['COMPULSORY_ELECTIVE']"
+             [routerLink]="['/study-program',program.studyProgram]"  
+           matTooltip="blok: {{program.blockName}}, ročník: {{program.yearsOfStudy}}" color="primary" selected>
+          {{program.studyProgram}} 
+        </mat-chip>
+        </mat-chip-list>  
+    </p>
+    <p *ngIf="studyPrograms['ELECTIVE']"><strong>Voliteľný predmet: </strong>
+      <mat-chip-list aria-label="Programs" class="inline-chips">
+        <mat-chip *ngFor="let program of studyPrograms['ELECTIVE']"
+             [routerLink]="['/study-program',program.studyProgram]"  
+           matTooltip="blok: {{program.blockName}}, ročník: {{program.yearsOfStudy}}" color="primary" selected>
+          {{program.studyProgram}} 
+        </mat-chip>
+        </mat-chip-list>  
+    </p>
+  </section>
+
+  <section id="texts" *ngIf="studyGoal.ais?.texts">
+    <h2>Texty v informačných listoch:</h2>
+    <div *ngFor="let txt of visibleSubjectTextTypes">
+      <div *ngIf="studyGoal.ais.texts[txt]">
+      <h3>{{textTitle(txt)}}</h3>
+      <div [innerHTML] = "studyGoal.ais.texts[txt]"></div>
+      </div>
+    </div>
+  </section>
+  <section id="invisibleTexts" *ngIf="hasInvisibleTexts">
+    <hr>
+    <h2>Texty, ktoré nevidieť v informačných listoch:</h2>
+    <div *ngFor="let txt of invisibleSubjectTextTypes">
+      <div *ngIf="studyGoal.ais.texts[txt]">
+      <h3>{{textTitle(txt)}}</h3>
+      <div [innerHTML] = "studyGoal.ais.texts[txt]"></div>
+      </div>
+    </div>
+  </section>
+</ng-container>

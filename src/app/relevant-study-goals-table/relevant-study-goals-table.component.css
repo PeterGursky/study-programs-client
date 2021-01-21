@@ -1,0 +1,43 @@
+table {
+  width: 100%;
+}
+tr.mat-row {
+  height: 33px;
+}
+th {
+  padding-right: 2px !important;
+}
+.mat-table td.mat-cell {
+  padding: 0 1px;
+}
+.mat-table td.mat-cell p {
+  margin-block-start: 1px;
+  margin-block-end: 1px;
+}
+.studyGoalName {
+  white-space: nowrap;
+}
+.mat-table .footer-invisible {
+  display: none;
+}
+.mat-table .mat-form-field-infix {
+  width: 250px;
+  padding: 0; 
+  border-top: 1px solid transparent;
+}
+
+.mat-table .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+.mat-table .mat-form-field-underline {
+  bottom: 0;
+}
+
+.mat-table .mat-form-field-infix textarea {
+  min-height: 70px;
+}
+
+.small-options.mat-option {
+  line-height: 25px;
+  height: 25px;
+ }

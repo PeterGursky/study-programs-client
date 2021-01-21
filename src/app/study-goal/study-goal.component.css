@@ -1,0 +1,13 @@
+#main_info {
+  position: relative;
+}
+.settings-container {
+  position: absolute;
+  top: 0;
+  right: 10px;
+}
+.edit-container {
+  position: absolute;
+  top: -50px;
+  right: 10px;
+}

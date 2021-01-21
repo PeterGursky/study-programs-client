@@ -1,0 +1,6 @@
+td, th {
+  padding: 1px 10px !important;
+}
+tr.mat-row {
+  height: 33px;
+}

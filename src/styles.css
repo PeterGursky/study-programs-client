@@ -1,1 +1,62 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+main { 
+  margin: 0 5px;
+}
+snack-bar-container.greenSnackBar .mat-button-wrapper {
+  color: greenyellow;
+}
+
+snack-bar-container.redSnackBar .mat-button-wrapper {
+  color: tomato;
+}
+
+mat-chip-list.inline-chips > div.mat-chip-list-wrapper {
+  display: inline-flex;
+}
+
+.big-panel .mat-expansion-panel-header {
+  display: block;
+  height: inherit;
+  padding: 0 5px;
+}
+.big-panel .mat-expansion-panel-body {
+  padding: 0 5px;
+}
+.big-panel .mat-expansion-panel-header .mat-content{
+  display: block;
+}
+
+.big-panel .mat-expansion-panel-header .mat-expansion-indicator{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.mat-tree-node {
+  min-height: 0px;
+}
+.mat-tree-node .mat-chip-list-wrapper {
+  min-width: 140px;
+}
+.mat-tree-node .mat-icon-button {
+  height: 34px;
+  line-height: 34px;
+}
+
+.textarea-form-field {
+  width: 500px;
+}
+.textarea-form-field textarea {
+  height: 150px;
+  resize: both;
+  width: 477px;
+}
+.textarea-form-field .mat-form-field-flex {
+  width: inherit;
+}
+.textarea-form-field .mat-form-field-infix {
+  width: inherit;
+}

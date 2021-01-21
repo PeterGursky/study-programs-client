@@ -1,0 +1,29 @@
+table {
+  width: 100%;
+}
+.teachersCol {
+  width: 200px;
+  padding: 4px;
+}
+.teachersCol mat-chip {
+  font-weight: 400;
+  margin: 1px;
+}
+tr.mat-row {
+  height: 33px;
+}
+th {
+  padding-right: 2px !important;
+}
+.green_text {
+  color: limegreen;
+  font-weight: bolder;
+}
+.yellow_text {
+  color: gold;
+  font-weight: bolder;
+}
+.red_text {
+  color: red;
+  font-weight: bolder;
+}

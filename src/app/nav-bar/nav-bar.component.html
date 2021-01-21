@@ -1,0 +1,33 @@
+<mat-toolbar color="primary">
+    <span><a mat-flat-button color="primary" routerLink="/" routerLinkActive="mat-accent">
+        Študijné programy</a>
+    </span>
+    <span class="spacer">
+      <form [formGroup]="queryForm">
+          <input type="text"
+                 matInput
+                 placeholder="hľadať..."
+                 formControlName="queryField"
+                 [matAutocomplete]="autoGroup">
+            <mat-autocomplete autoActiveFirstOption #autoGroup="matAutocomplete" [displayWith]="displayResult" (optionSelected)="selected($event)">
+              <mat-optgroup *ngFor="let group of searchOptions | async" [label]="group.type" class="small-options">
+                <mat-option *ngFor="let result of group.results" [value]="result">
+                  {{result.description}}
+                </mat-option>
+            </mat-optgroup>
+          </mat-autocomplete>
+      </form>
+    </span>
+
+  <span *ngIf="username; else elseBlock">
+      <button type="button" mat-flat-button color="primary" (click)="logout()">
+        {{username}}
+        <mat-icon>logout</mat-icon>
+      </button>
+  </span>
+  <ng-template #elseBlock>
+      <a mat-flat-button color="primary" routerLink="/login" routerLinkActive="mat-accent" (click)="setUrlAfterLogin()">
+          <mat-icon>login</mat-icon>
+      </a>
+  </ng-template>
+</mat-toolbar>

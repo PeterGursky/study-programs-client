@@ -1,0 +1,21 @@
+#header_info {
+  position: relative;
+}
+.settings-container {
+  position: absolute;
+  top: 0;
+  right: 10px;
+}
+.edit-container {
+  position: absolute;
+  top: -50px;
+  right: 10px;
+}
+.mat-chip.mat-standard-chip.green-chip {
+  background-color: green;
+  color: white;
+}
+
+.field-chip-list {
+  width: 100%;
+}

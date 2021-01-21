@@ -1,0 +1,98 @@
+<h1>Študijný plán</h1>
+<ng-container *ngIf="program">
+  <section id="header_info">
+    <div class="settings-container">
+      <button mat-mini-fab color="primary" (click)="settingsClick()">
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
+    <div class="edit-container" *ngIf="userName$ | async">
+      <button mat-mini-fab color="accent" (click)="editing = true" *ngIf="!editing">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-mini-fab color="accent" (click)="editing = false; showAddFoeFormField=false" *ngIf="editing">
+        <mat-icon>visibility</mat-icon>
+      </button>
+    </div>
+    Študijný program: <strong>{{program.plan.name}}</strong><br>
+    Fakulta: <strong>{{program.plan.faculty}}</strong><br>
+    Akademický rok: <strong>{{program.plan.year}}</strong>
+  </section>
+  <section id="following" *ngIf="editing || fieldsOfExpertise.length">
+    <p>
+    <strong *ngIf="!showAddFoeFormField">Možnosti uplatnenia: </strong>
+    <mat-chip-list class="inline-chips" *ngIf="!showAddFoeFormField">
+      <mat-chip *ngFor="let foe of fieldsOfExpertise" [routerLink]="[subjectUrl(foe.id)]" color="accent" selected>
+        {{foe.name}}
+      </mat-chip>
+      <mat-chip  (click)="showAddFoeFormField=true" class="green-chip" matTooltip="Pridať novú" *ngIf="editing">
+        <mat-icon>add</mat-icon>
+      </mat-chip>      
+    </mat-chip-list>
+    <mat-form-field class="field-chip-list" *ngIf="showAddFoeFormField">
+      <mat-chip-list #chipList>
+        <mat-chip *ngFor="let foe of fieldsOfExpertise" [removable]="true" (removed)="removeFOE(foe)" color="accent" selected [matTooltip]="foe.id">
+          {{foe.name}}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip>
+        <input placeholder="Možnosti uplatnenia..."
+               [matChipInputFor]="chipList"
+               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+               [matChipInputAddOnBlur]="false"
+               (matChipInputTokenEnd)="addFOE($event)">
+      </mat-chip-list>
+    </mat-form-field>
+    </p>
+  </section>
+  <div *ngIf="showBlocks$ | async; then blocks else noBlocks"></div>
+  <ng-template #blocks>
+    <section *ngFor="let studyPart of program.plan.studyParts" [id]="studyPart.type">
+      <h2>{{studyPart.typeName}}</h2>
+      <div>
+        <span *ngIf="studyPart.minCredits">Minimálny počet kreditov: {{studyPart.minCredits}}, </span>
+        <span *ngIf="studyPart.minCreditsCompulsoryElective">Minimálny počet kreditov povinne voliteľných predmetov: {{studyPart.minCreditsCompulsoryElective}}</span>
+        <div *ngFor="let studyBlock of studyPart.studyBlocks">
+          <h3 *ngIf="studyBlock.blockType=='COMPULSORY'">Povinný blok - {{studyBlock.blockAbbreviation}} - {{studyBlock.blockName}}</h3>
+          <h3 *ngIf="studyBlock.blockType=='COMPULSORY_ELECTIVE'">Povinne voliteľný blok - {{studyBlock.blockAbbreviation}} - {{studyBlock.blockName}}</h3>
+          <h3 *ngIf="studyBlock.blockType=='ELECTIVE'">Voliteľný blok - {{studyBlock.blockAbbreviation}} - {{studyBlock.blockName}}</h3>
+          <span *ngIf="studyBlock.minCredits">Minimálny počet kreditov v bloku: {{studyBlock.minCredits}}</span>
+          <app-study-program-subjects-table [subjects]="studyBlock.subjects"></app-study-program-subjects-table>
+        </div>
+      </div>
+    </section>
+  </ng-template>
+  <ng-template #noBlocks>
+    <section id="study_part">
+      <h2>Študijná časť</h2>
+      <div *ngIf="sc_compulsory">
+        <h3>Povinné predmety</h3>
+        <app-study-program-subjects-table [subjects]="sc_compulsory"></app-study-program-subjects-table>
+      </div>
+      <div *ngIf="sc_compulsory_elective">
+        <h3>Povinne voliteľné predmety</h3>
+        <span *ngIf="program.plan.studyParts[0].minCreditsCompulsoryElective">Minimálny počet kreditov: {{program.plan.studyParts[0].minCreditsCompulsoryElective}}</span>
+        <app-study-program-subjects-table [subjects]="sc_compulsory_elective"></app-study-program-subjects-table>
+      </div>
+      <div *ngIf="sc_elective">
+        <h3>Voliteľné predmety</h3>
+        <app-study-program-subjects-table [subjects]="sc_elective"></app-study-program-subjects-table>
+      </div>
+    </section>
+    <section id="state_exam">
+      <h2>Štátnice</h2>
+      <div *ngIf="ss_compulsory">
+        <h3>Povinné predmety</h3>
+        <app-study-program-subjects-table [subjects]="ss_compulsory"></app-study-program-subjects-table>
+      </div>
+      <div *ngIf="ss_compulsory_elective">
+        <h3>Povinne voliteľné predmety</h3>
+        <app-study-program-subjects-table [subjects]="ss_compulsory_elective"></app-study-program-subjects-table>
+      </div>
+      <div *ngIf="ss_elective">
+        <h3>Voliteľné predmety</h3>
+        <app-study-program-subjects-table [subjects]="ss_elective"></app-study-program-subjects-table>
+      </div>     
+    </section>
+  </ng-template>
+
+</ng-container>

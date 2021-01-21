@@ -1,0 +1,70 @@
+<table *ngIf="tableData.length" mat-table [dataSource]="tableData" class="mat-elevation-z8">
+  <ng-container matColumnDef="id" >
+    <th mat-header-cell *matHeaderCellDef>Skratka</th>
+    <td mat-cell *matCellDef="let subject">
+      <mat-chip-list>
+        <mat-chip *ngIf="subject.available && subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="primary" selected>
+          {{subject.id}}
+        </mat-chip>
+        <mat-chip *ngIf="subject.available && !subject.aisRelative" [routerLink]="[subjectUrl(subject.id)]" color="accent" selected>
+          <ng-container *ngIf="fieldsOfExpertise">{{subject.name}}</ng-container>
+          <ng-container *ngIf="!fieldsOfExpertise">{{subject.id}}</ng-container>
+        </mat-chip>
+        <mat-chip *ngIf="!subject.available" color="warn" selected matTooltip="Zrušený predmet - {{subject.name}}">
+          {{subject.id}}
+        </mat-chip>
+      </mat-chip-list>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="name" >
+    <th mat-header-cell *matHeaderCellDef>Názov</th>
+    <td mat-cell *matCellDef="let subject" class="studyGoalName"> {{subject.name}} </td>
+  </ng-container>
+  <ng-container matColumnDef="VV" >
+    <th mat-header-cell *matHeaderCellDef>Výsledok vzdelávania (AIS)</th>
+    <td mat-cell *matCellDef="let subject"><span [innerHTML]="subject.VV"></span></td>
+  </ng-container>
+  <ng-container matColumnDef="requirements" >
+    <th mat-header-cell *matHeaderCellDef nowrap>{{reqColName}}</th>
+    <td mat-cell *matCellDef="let subject">
+      <span *ngIf="!editing || !subject.available" [innerHTML]="subject.reqHTML"></span>
+      <form *ngIf="editing && subject.available">
+        <mat-form-field appearance="fill">
+          <textarea matInput [(ngModel)]="subject.requirements" name="reqTextArea"></textarea>
+          <button mat-icon-button matSuffix (click)="saveRequirement(subject)" matTooltip="Uložiť">
+            <mat-icon>send</mat-icon>
+          </button>        
+        </mat-form-field>
+      </form>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="actions" >
+    <td mat-footer-cell *matFooterCellDef colspan="4">
+      <ng-container *ngTemplateOutlet="addSubjectForm"></ng-container>
+    </td>
+  </ng-container>
+  
+  <tr mat-header-row *matHeaderRowDef="columnsToShow"></tr>
+  <tr mat-row *matRowDef="let row; columns: columnsToShow;"></tr>
+  <tr mat-footer-row *matFooterRowDef="['actions']" [class.footer-invisible]="!editing"></tr>
+</table>
+<div *ngIf="editing && (!tableData || !tableData.length)">
+  <ng-container *ngTemplateOutlet="addSubjectForm"></ng-container>
+</div>
+
+<ng-template #addSubjectForm>
+  Pridať obsahovú prerekvizitu:
+  <form [formGroup]="searchForm">
+    <input type="text"
+            matInput
+            placeholder="hľadať predmet..."
+            formControlName="searchField"
+            [matAutocomplete]="subjGroup">
+      <mat-autocomplete autoActiveFirstOption #subjGroup="matAutocomplete" [displayWith]="displayResult" (optionSelected)="selected($event)">
+          <mat-option *ngFor="let result of searchOptions | async" [value]="result" class="small-options">
+            {{result.description}}
+          </mat-option>
+    </mat-autocomplete>
+  </form>
+</ng-template>
+
