@@ -23,7 +23,7 @@
   </ng-container>
   <ng-container matColumnDef="evaluation" >
     <th mat-header-cell *matHeaderCellDef mat-sort-header>Ukonč.</th>
-    <td mat-cell *matCellDef="let subject"> {{subject.ais.evaluation}} </td>
+    <td mat-cell *matCellDef="let subject"> <span [matTooltip]="subjectEvaluationTypeSK[subject.ais.evaluation]">{{computed[subject.id].evaluation}}</span> </td>
   </ng-container>
   <ng-container matColumnDef="programLevels"  >
     <th mat-header-cell *matHeaderCellDef mat-sort-header>Stupeň</th>

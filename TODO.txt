@@ -1,0 +1,4 @@
+- vypísať pri učiteľoch x/y rozsahy predmetov
+- RSI nemá uvedené rozsahy
+- lokalizacia.txt
+- ostatné študijné odbory (+ nejaký filter na stránku študijných programov)

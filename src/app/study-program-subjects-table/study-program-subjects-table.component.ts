@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
-import { SubjectInStudyPlan } from 'src/entities/study-goal';
+import { subjectEvaluationTypeSK, SubjectInStudyPlan } from 'src/entities/study-goal';
 import { StudyProgramSettingsState } from 'src/shared/study-program-settings.state';
 
 @Component({
@@ -14,6 +14,7 @@ export class StudyProgramSubjectsTableComponent implements OnInit {
 
   @Select(StudyProgramSettingsState.columns) columns$: Observable<string[]>;
   columnsToDisplay: string[];
+  subjectEvaluationTypeSK = subjectEvaluationTypeSK;
 
   constructor() { }
 

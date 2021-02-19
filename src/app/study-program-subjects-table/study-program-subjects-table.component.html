@@ -23,7 +23,7 @@
   </ng-container>
   <ng-container matColumnDef="evaluation" >
     <th mat-header-cell *matHeaderCellDef>Ukonč.</th>
-    <td mat-cell *matCellDef="let subject"> {{subject.evaluation}} </td>
+    <td mat-cell *matCellDef="let subject"> <span [matTooltip]="subjectEvaluationTypeSK[subject.evaluation]">{{subject.evaluation}}</span> </td>
   </ng-container>
   <ng-container matColumnDef="suggestedYears" >
     <th mat-header-cell *matHeaderCellDef>Roč.</th>

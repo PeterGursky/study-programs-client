@@ -39,10 +39,11 @@ export const subjectTypeSK = {
   O: "štátna skúška - obhajoba",
   Z: "záverečná práca"
 }
-export type SubjectEvaluationType = "A" | "C" | "S" | "Z" | "ZS" | "KZ" | "P" | "PaS";
+export type SubjectEvaluationType = "A" | "C" | "S" | "Z" | "ZS" | "KZ" | "P" | "PaS" | "H";
 export const subjectEvaluationTypeSK = {
   A: "Absolvovanie",
 	C: "Hodnotenie",
+	H: "Hodnotenie",
 	S: "Skúška",
 	Z: "Zápočet",
 	ZS: "Zápočet a skúška",

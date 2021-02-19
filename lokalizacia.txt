@@ -1,0 +1,41 @@
+npm i @ngx-translate/core --save
+npm i @ngx-translate/http-loader --save
+
+v app.modules.translate:
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/','.json');
+}
+@NgModule({
+  imports:[
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
+    })
+  ]
+})
+
+v src/assets/i18n/ vyrobíme en.json, sk.json
+{
+  "welcomeMessage": "Welcome to angular"
+}
+{
+  "welcomeMessage": "Vitajte v angulari"
+}
+
+v app.component.ts
+ constructor(private translate: TranslateService) {
+   translate.setDefaultLang('en');
+   translate.use('en');
+ }
+ useLanguage(language: string) {
+   this.translate.use(language);
+   console.log(this.translate.instant("welcomeMessage"));
+ }
+
+v app.component.html
+<h1> {{ 'welcomeMessage' | translate}}</h1>
+<button (click)="useLanguage('en')">EN</button>
+<button (click)="useLanguage('sk')">SK</button>

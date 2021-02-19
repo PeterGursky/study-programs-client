@@ -30,6 +30,7 @@ export class TeacherComponent implements OnInit, OnDestroy {
   showByRoles = true;
   @Select(SubjectsTableSettingsState.showByRoles) showByRoles$: Observable<boolean>;
   showByRolesSubscription: Subscription;
+
   editing = false;
   url = "";
   researchHTML = "";

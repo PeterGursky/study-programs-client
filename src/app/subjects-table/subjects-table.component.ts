@@ -3,7 +3,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Select } from '@ngxs/store';
 import { Observable, Subscription } from 'rxjs';
-import { StudyGoal } from 'src/entities/study-goal';
+import { StudyGoal, subjectEvaluationTypeSK } from 'src/entities/study-goal';
 import { SubjectsTableSettingsState } from 'src/shared/subjects-table-settings.state';
 import { subjectTextTypeSK } from 'src/entities/study-goal'; 
 
@@ -29,6 +29,7 @@ export class SubjectsTableComponent implements OnInit, OnChanges, OnDestroy, Aft
     ELECTIVE: 'basic'
   }
   subjectTextTypeSK = subjectTextTypeSK;
+  subjectEvaluationTypeSK = subjectEvaluationTypeSK;
 
   constructor() { }
 
@@ -72,6 +73,7 @@ export class SubjectsTableComponent implements OnInit, OnChanges, OnDestroy, Aft
           if (a.blockName > b.blockName) return 1;
           return 0;
         });
+        let evaluation = subj.ais.evaluation === 'C' ?  'H': subj.ais.evaluation ;
         let texts = {};
         for (let key of Object.keys(subjectTextTypeSK)) {
           texts[key] = ({ length: 0, color: this.textLengthColor(key, 0)})
@@ -85,18 +87,21 @@ export class SubjectsTableComponent implements OnInit, OnChanges, OnDestroy, Aft
         this.computed[subj.id] = {
           programLevels: programLevels.join(", "),
           inPrograms,
-          texts
+          texts,
+          evaluation
         }
       }
       const sortedsubjects = [...this.subjects].sort((a,b) => {
         if (this.computed[a.id].programLevels < this.computed[b.id].programLevels) return -1;
         if (this.computed[a.id].programLevels > this.computed[b.id].programLevels) return 1;
-        if (a.ais.semester > b.ais.semester) return -1;
-        if (b.ais.semester < a.ais.semester) return 1;
-        if (a.ais.teachers.length < b.ais.teachers.length) return -1;
-        if (a.ais.teachers.length > b.ais.teachers.length) return 1;
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
+        if (a.id < b.id) return -1;
+        if (a.id > b.id) return 1;
+        // if (a.ais.semester > b.ais.semester) return -1;
+        // if (a.ais.semester < b.ais.semester) return 1;
+        // if (a.ais.teachers.length < b.ais.teachers.length) return -1;
+        // if (a.ais.teachers.length > b.ais.teachers.length) return 1;
+        // if (a.name < b.name) return -1;
+        // if (a.name > b.name) return 1;
         return 0;
       })
       this.dataSource.data = sortedsubjects;

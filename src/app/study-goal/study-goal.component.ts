@@ -110,65 +110,50 @@ export class StudyGoalComponent implements OnInit {
     return false;
   }
 
-  /* returns  */
-  private moveAisIrelevantRelatives(aisRelatives: TaggedStudyGoalNode[], otherRoots: TaggedStudyGoalNode[], prereq: boolean): TaggedStudyGoalNode[] {
-    let restOtherRoots: TaggedStudyGoalNode[] = null;
-    for (let aisR of aisRelatives) {
-      if (aisR.children && aisR.children.length) {
-        if (restOtherRoots) {
-          restOtherRoots = this.moveAisIrelevantRelatives(aisR.children, otherRoots, prereq).filter(node => restOtherRoots.some(restNode => restNode.id === node.id)); 
-          //prienik - tu a vyššie skúšam prideľovať iba také, ktoré neboli pridelené žiadnemu dieťaťu
-        } else {
-          restOtherRoots = this.moveAisIrelevantRelatives(aisR.children, otherRoots, prereq)
-        }
-      }
-    }
-    if (!restOtherRoots) // ak ani jeden z aisRelatives nemá deti
-      restOtherRoots = otherRoots;
-    let assignedRoots: TaggedStudyGoalNode[] = [];
-    for (let node of restOtherRoots) {
-      let assigned = false;
-      for (let aisR of aisRelatives) {
-        if ((prereq && aisR.goal && aisR.goal.prerequisities.some(prer => prer.id === node.id)) || 
-            (!prereq && aisR.goal && aisR.goal.following.some(prer => prer.id === node.id))) {
-              aisR.children = [...aisR.children, node];
-              assigned = true;
-        }
-      }
-      if (assigned) 
-        assignedRoots.push(node);
-    }
-    return restOtherRoots.filter(node => ! assignedRoots.includes(node));
+  /** returns descendants of given study goal */
+  private getDescentants(studyGoal: StudyGoal, prereq: boolean): TaggedStudyGoal[] {
+    if (!studyGoal) return [];
+    const allGoals = prereq ? this.sgPrerequisities : this.sgFollowing;
+    const filterFn = (tsg: TaggedStudyGoal) => prereq
+                            ? studyGoal.prerequisities.some(prereq => prereq.id === tsg.id)
+                            :tsg.goal.prerequisities.some(prereq => prereq.id === studyGoal.id);
+    const filterFnAis = (tsg: TaggedStudyGoal) => prereq
+                            ? studyGoal.ais.prerequisites.some(aisP => aisP.id === tsg.id)
+                            :tsg.goal.ais.prerequisites.some(aisP => aisP.id === studyGoal.id);
+    const aisDescs = studyGoal.ais ? allGoals.filter(filterFnAis).map(desc => ({...desc, aisRelative: true})) : [];
+    return [...aisDescs,...allGoals.filter(filterFn).filter(desc => !aisDescs.some(tsg => tsg.id === desc.id))]; //vrátim najprv ais potomkov a potom zvyšných
   }
 
-  private fillTrees(studyGoal: StudyGoal, prereq: boolean, node?: TaggedStudyGoalNode) : TaggedStudyGoalNode[] {
-    if (!studyGoal) return;
-    const taggedStudyGoals = prereq ? this.sgPrerequisities : this.sgFollowing;
-    const filterFn = (tsg: TaggedStudyGoal) => prereq
-                        ? studyGoal.ais.prerequisites.some(aisP => aisP.id === tsg.id)
-                        :tsg.goal.ais.prerequisites.some(aisP => aisP.id === studyGoal.id);
 
-    let children = studyGoal.ais ? taggedStudyGoals.filter(filterFn).map(taggedGoal => ({...taggedGoal, children: null})) : [];
+  /** returns all distinct descendants of given tagged study goals */
+  private getAllDescentants(studyGoals: TaggedStudyGoal[], prereq: boolean): TaggedStudyGoal[] {
+    let result = [];
+    for(let parent of studyGoals) {
+      const descs = this.getDescentants(parent.goal, prereq)
+                        .filter(desc => !result.some(tsg => tsg.id === desc.id)); //pridáme také deti, ktoré ešte nie sú v resulte
+      result = [...result, ...descs];
+    }
+    return result;
+  }
+
+  private getChildren(studyGoal:StudyGoal, prereq:boolean): TaggedStudyGoal[] {
+    const myDescs = this.getDescentants(studyGoal,prereq);
+    const grandDescs = this.getAllDescentants(myDescs,prereq);
+    return myDescs.filter(myDesc => !grandDescs.some(gd => gd.id === myDesc.id)); // nechám takých potomkov, ktorí nie sú potomkami mojich detí
+  }
+
+  private fillTrees(studyGoal: StudyGoal, prereq: boolean, node?: TaggedStudyGoalNode) {
+    if (!studyGoal) return;
+//    debugger;
+    const childrenNodes = this.getChildren(studyGoal, prereq).map(taggedGoal => ({...taggedGoal, children: null}));
+    childrenNodes.forEach(child => this.fillTrees(child.goal, prereq, child));
     if (node) {
-      children.forEach(child => this.fillTrees(child.goal, prereq, child));
-      node.children = children;
+      node.children = childrenNodes;
     } else {
       if (prereq) {
-        const otherRelatives = this.sgPrerequisities.filter(tsg => !tsg.aisRelative);
-        let otherRoots = otherRelatives.filter(tsg => ! otherRelatives.some(other => other.goal.prerequisities.some(prer => prer.id === tsg.id)));
-        let otherRootNodes = otherRoots.map(taggedGoal => ({...taggedGoal, children: null}));
-        children.forEach(child => this.fillTrees(child.goal, prereq, child));
-        otherRootNodes.forEach(child => this.fillTrees(child.goal, prereq, child));
-        let restOtherRootNodes = this.moveAisIrelevantRelatives(children, otherRootNodes, prereq);
-        this.sgPrerequisitiesTree = [...children, ...restOtherRootNodes];
-      } else {
-        const otherRelatives = this.sgFollowing.filter(tsg => !tsg.aisRelative);
-        let otherRoots = otherRelatives.filter(tsg => ! otherRelatives.some(other => other.goal.following.some(prer => prer.id === tsg.id)));
-        let otherRootNodes = otherRoots.map(taggedGoal => ({...taggedGoal, children: null}));
-        children.forEach(child => this.fillTrees(child.goal, prereq, child));
-        otherRootNodes.forEach(child => this.fillTrees(child.goal, prereq, child));
-        let restOtherRootNodes = this.moveAisIrelevantRelatives(children, otherRootNodes, prereq);
-        this.sgFollowingTree = [...children, ...restOtherRootNodes];
+        this.sgPrerequisitiesTree = childrenNodes;
+      } else { 
+        this.sgFollowingTree = childrenNodes;
       }
     }
   }

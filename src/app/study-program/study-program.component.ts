@@ -78,9 +78,10 @@ export class StudyProgramComponent implements OnInit {
   }
 
   extractBlocks(type: StudyPlanBlockType, studyPart: StudyPlanPart): SubjectInStudyPlan[] {
-    const result = studyPart.studyBlocks
+    let result = studyPart.studyBlocks
             .filter(block => block.blockType === type)
             .flatMap(block => block.subjects)
+    result = this.removeDuplicities(result)
             .sort((a,b) => {
               if (a.suggestedYears.trim().length == 0 && b.suggestedYears.trim().length > 0) return 1;
               if (a.suggestedYears.trim().length > 0 && b.suggestedYears.trim().length == 0) return -1;
@@ -95,6 +96,10 @@ export class StudyProgramComponent implements OnInit {
               return 0;
             }); 
     return result.length == 0 ? null : result;
+  }
+
+  removeDuplicities(subjects: SubjectInStudyPlan[]): SubjectInStudyPlan[] {
+    return subjects.reduce((list, value) => list.some(sub => sub.id === value.id) ? list : [...list, value], []);
   }
 
   addFOE(event: MatChipInputEvent): void {
